@@ -2,9 +2,6 @@
 //  CHChartAlgorithm.swift
 //  CHKLineChart
 //
-//  Created by Chance on 16/9/14.
-//  Copyright © 2016年 bitbank. All rights reserved.
-//
 
 import UIKit
 

@@ -2,9 +2,6 @@
 //  ChartDemoViewController.swift
 //  CHKLineChart
 //
-//  Created by Chance on 16/9/19.
-//  Copyright © 2016年 bitbank. All rights reserved.
-//
 
 import UIKit
 
@@ -16,16 +13,16 @@ class ChartDemoViewController: UIViewController {
     @IBOutlet var segAnalysis: UISegmentedControl!
     @IBOutlet var loadingView: UIActivityIndicatorView!
     
-    var klineDatas = [AnyObject]()
+    var klineDatas = [CHChartItem]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.chartView.delegate = self
         self.chartView.style = .base
-        //使用代码创建K线图表
-        //self.createChartView()
-
-//        self.getDataByFile()        //读取文件
+//        使用代码创建K线图表
+//        self.createChartView()
+        
+//        self.getDataByFile()              //读取文件
         self.getRemoteServiceData()       //读取网络
     }
     
@@ -67,35 +64,29 @@ class ChartDemoViewController: UIViewController {
         // 快捷方式获得session对象
         let session = URLSession.shared
         
-        let url = URL(string: "https://www.btc123.com/kline/klineapi?symbol=chbtcbtccny&type=1day&size=1200")
+        let url = URL(string: "http://db2015.wstock.cn/wsDB_API/kline.php?stime=2015-03-31&num=3000&u=test&p=8e6a&symbol=SH600111&r_type=2")
         // 通过URL初始化task,在block内部可以直接对返回的数据进行处理
         let task = session.dataTask(with: url!, completionHandler: {
             (data, response, error) in
             if let data = data {
                 
+                let json = JSON(data)
+                print(json)
+                
+                let array = json.arrayObject
+                for data in array!.reversed() {
+                    
+                    let chartItem = CHChartItem(fromDictionary: data as! NSDictionary)
+                    self.klineDatas.append(chartItem)
+                    
+                }
+            
                 DispatchQueue.main.async {
                     /*
                      对从服务器获取到的数据data进行相应的处理.
                      */
-                    do {
-                        NSLog("\(NSString(data: data, encoding: String.Encoding.utf8.rawValue))")
-                        let dict = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableLeaves) as! [String: AnyObject]
-                        
-                        let isSuc = dict["isSuc"] as? Bool ?? false
-                        if isSuc {
-                            let datas = dict["datas"] as! [AnyObject]
-                            NSLog("chart.datas = \(datas.count)")
-                            self.klineDatas = datas
-                            
-                            self.chartView.reloadData()
-                            
-                            
-                        }
-                        
-                    } catch _ {
-                        
-                    }
-                    
+        
+                    self.chartView.reloadData()
                     self.loadingView.stopAnimating()
                     self.loadingView.isHidden = true
                 }
@@ -116,7 +107,7 @@ class ChartDemoViewController: UIViewController {
         if isSuc {
             let datas = dict["datas"] as! [AnyObject]
             NSLog("chart.datas = \(datas.count)")
-            self.klineDatas = datas
+            self.klineDatas = datas as! [CHChartItem]
             self.chartView.reloadData()
         }
     }
@@ -167,15 +158,9 @@ extension ChartDemoViewController: CHKLineChartDelegate {
     }
     
     func kLineChart(_ chart: CHKLineChartView, valueForPointAtIndex index: Int) -> CHChartItem {
-        let data = self.klineDatas[index] as! [Double]
-        let item = CHChartItem()
-        item.time = Int(data[0] / 1000)
-        item.openPrice = CGFloat(data[1])
-        item.highPrice = CGFloat(data[2])
-        item.lowPrice = CGFloat(data[3])
-        item.closePrice = CGFloat(data[4])
-        item.vol = CGFloat(data[5])
-        return item
+        let data = self.klineDatas[index]
+        
+        return data
     }
     
     func kLineChart(_ chart: CHKLineChartView, labelOnYAxisForValue value: CGFloat, section: CHSection) -> String {
@@ -189,9 +174,9 @@ extension ChartDemoViewController: CHKLineChartDelegate {
     }
     
     func kLineChart(_ chart: CHKLineChartView, labelOnXAxisForIndex index: Int) -> String {
-        let data = self.klineDatas[index] as! [Double]
-        let timestamp = Int(data[0])
-        return Date.ch_getTimeByStamp(timestamp, format: "HH:mm")
+        return  self.klineDatas[index].time
+        //        let timestamp = Int(data[0])
+        //        return Date.ch_getTimeByStamp(timestamp, format: "HH:mm")
     }
     
     

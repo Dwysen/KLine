@@ -2,9 +2,6 @@
 //  CHKLineChart.swift
 //  CHKLineChart
 //
-//  Created by Chance on 16/9/6.
-//  Copyright © 2016年 bitbank. All rights reserved.
-//
 
 import UIKit
 
@@ -318,7 +315,8 @@ open class CHKLineChartView: UIView {
                 }
                 self.selectedYAxisLabel.text = String(format: format, yVal)     //显示实际值
                 self.selectedYAxisLabel.frame = CGRect(x: yAxisStartX, y: point.y - self.labelSize.height / 2, width: self.yLabelWidth, height: self.labelSize.height)
-                let time = Date.ch_getTimeByStamp(item.time, format: "yyyy-MM-dd HH:mm") //显示实际值
+                let time = item.time
+//                let time = Date.ch_getTimeByStamp(item.time, format: "yyyy-MM-dd HH:mm") //显示实际值
                 let size = time.ch_heightWithConstrainedWidth(self.labelFont)
                 self.selectedXAxisLabel.text = time
                 

@@ -2,9 +2,6 @@
 //  CHChartModel.swift
 //  CHKLineChart
 //
-//  Created by Chance on 16/9/6.
-//  Copyright © 2016年 bitbank. All rights reserved.
-//
 
 import UIKit
 
@@ -28,7 +25,7 @@ public enum CHChartItemTrend {
  */
 open class CHChartItem: NSObject {
     
-    open var time: Int = 0
+    open var time: String = ""
     open var openPrice: CGFloat = 0
     open var closePrice: CGFloat = 0
     open var lowPrice: CGFloat = 0
@@ -36,6 +33,18 @@ open class CHChartItem: NSObject {
     open var vol: CGFloat = 0
     open var value: CGFloat?
     open var extVal: [String: CGFloat] = [String: CGFloat]()        //扩展值，用来记录各种技术指标
+    
+    
+    init(fromDictionary dictionary: NSDictionary){
+        
+        time = (dictionary["Date"] as! NSString) as String
+        openPrice = CGFloat((dictionary["Open"] as! NSString).floatValue)
+        closePrice = CGFloat((dictionary["Close"] as! NSString).floatValue)
+        lowPrice = CGFloat((dictionary["Low"] as! NSString).floatValue)
+        highPrice = CGFloat((dictionary["High"] as! NSString).floatValue)
+        vol = CGFloat((dictionary["Volume"] as! NSString).floatValue)
+        
+    }
     
     open var trend: CHChartItemTrend {
         if closePrice == openPrice {
@@ -72,6 +81,9 @@ open class CHChartModel {
     open var key: String = ""                                     //key的名字
     
     weak var section: CHSection!
+    
+    
+    
     
     convenience init(upColor: UIColor,
                      downColor: UIColor,
@@ -113,7 +125,7 @@ open class CHLineModel: CHChartModel {
      - parameter plotPaddingExt: 点与点之间间断所占点宽的比例
      */
     open override func drawSerie(_ startIndex: Int, endIndex: Int,
-                                   plotPaddingExt: CGFloat = 0.25) {
+                                 plotPaddingExt: CGFloat = 0.25) {
         
         //每个点的间隔宽度
         let plotWidth = (self.section.frame.size.width - self.section.padding.left - self.section.padding.right) / CGFloat(endIndex - startIndex)
@@ -141,7 +153,7 @@ open class CHLineModel: CHChartModel {
             let iys = self.section.getLocalY(value!)
             let iye = self.section.getLocalY(valueNext!)
             
-
+            
             context?.setStrokeColor(self.upColor.cgColor)
             context?.move(to: CGPoint(x: ix + plotWidth / 2, y: iys))      //移动到当前点
             context?.addLine(to: CGPoint(x: iNx + plotWidth / 2, y: iye)) //画一条直线到下一个点
@@ -167,7 +179,7 @@ open class CHCandleModel: CHChartModel {
      - parameter plotPaddingExt: 点与点之间间断所占点宽的比例
      */
     open override func drawSerie(_ startIndex: Int, endIndex: Int,
-                                   plotPaddingExt: CGFloat = 0.25) {
+                                 plotPaddingExt: CGFloat = 0.25) {
         
         //每个点的间隔宽度
         let plotWidth = (self.section.frame.size.width - self.section.padding.left - self.section.padding.right) / CGFloat(endIndex - startIndex)
@@ -298,7 +310,7 @@ open class CHCandleModel: CHChartModel {
         let fontAttributes = [
             NSFontAttributeName: section.labelFont,
             NSForegroundColorAttributeName: self.titleColor
-        ] as [String : Any]
+            ] as [String : Any]
         
         //计算画文字的位置
         let point = CGPoint(x: maxPriceStartX, y: point.y - fontSize.height / 2)
@@ -306,7 +318,7 @@ open class CHCandleModel: CHChartModel {
         //画最大值数字
         NSString(string: value)
             .draw(at: point,
-                         withAttributes: fontAttributes)
+                  withAttributes: fontAttributes)
         
         context.setShouldAntialias(false)
         
@@ -328,7 +340,7 @@ open class CHColumnModel: CHChartModel {
      - parameter plotPaddingExt: 点与点之间间断所占点宽的比例
      */
     open override func drawSerie(_ startIndex: Int, endIndex: Int,
-                                   plotPaddingExt: CGFloat = 0.25) {
+                                 plotPaddingExt: CGFloat = 0.25) {
         
         //每个点的间隔宽度
         let plotWidth = (self.section.frame.size.width - self.section.padding.left - self.section.padding.right) / CGFloat(endIndex - startIndex)
@@ -342,11 +354,11 @@ open class CHColumnModel: CHChartModel {
         
         //循环起始到终结
         for i in stride(from: startIndex, to: endIndex, by: 1) {
-//            let value = self[i].value
-//            
-//            if value == nil{
-//                continue  //无法计算的值不绘画
-//            }
+            //            let value = self[i].value
+            //            
+            //            if value == nil{
+            //                continue  //无法计算的值不绘画
+            //            }
             
             let item = datas[i]
             //开始X
@@ -472,7 +484,7 @@ extension CHChartModel {
     //生成一个柱状样式
     class func getBar(upColor: UIColor, downColor: UIColor, titleColor: UIColor, title: String, key: String) -> CHBarModel {
         let model = CHBarModel(upColor: upColor, downColor: downColor,
-                                  titleColor: titleColor)
+                               titleColor: titleColor)
         model.title = title
         model.key = key
         return model
@@ -483,11 +495,11 @@ extension CHChartModel {
 extension CHChartModel {
     
     public subscript (index: Int) -> CHChartItem {
-            var value: CGFloat?
-            let item = self.datas[index]
-            value = item.extVal[self.key]
-            item.value = value
-            return item
-        }
+        var value: CGFloat?
+        let item = self.datas[index]
+        value = item.extVal[self.key]
+        item.value = value
+        return item
+    }
     
 }
